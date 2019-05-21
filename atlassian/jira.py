@@ -819,7 +819,7 @@ class Jira(AtlassianRestAPI):
         url = 'rest/api/2/issue/{issue_key}?expand=transitions.fields&fields=status'.format(issue_key=issue_key)
         return [{'name': transition['name'], 'id': int(transition['id']), 'to': transition['to']['name']}
                 for transition in (self.get(url) or {}).get('transitions')]
-
+    
     def get_status_id_from_name(self, status_name):
         url = 'rest/api/2/status/{name}'.format(name=status_name)
         return int((self.get(url) or {}).get('id'))
@@ -839,6 +839,15 @@ class Jira(AtlassianRestAPI):
     def set_issue_status(self, issue_key, status_name):
         url = 'rest/api/2/issue/{issue_key}/transitions'.format(issue_key=issue_key)
         transition_id = self.get_transition_id_to_status_name(issue_key, status_name)
+        return self.post(url, data={'transition': {'id': transition_id}})
+    
+    def set_issue_status_by_id(self, issue_key, transition_id):
+        """
+        Setting status by transition_id
+        :param issue_key: str
+        :param transition_id: int
+        """
+        url = 'rest/api/2/issue/{issue_key}/transitions'.format(issue_key=issue_key)
         return self.post(url, data={'transition': {'id': transition_id}})
 
     def get_issue_status(self, issue_key):
